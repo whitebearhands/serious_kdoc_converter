@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "skdconv"
+version = "1.0.2"
+description = "문서(HWP 3.x, HWP 5.x, HWPX, HWPML, XLSX, XLS, DOCX)를 마크다운으로 변환하는 파서 라이브러리"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["hwp", "hwpx", "hancom", "hangul", "korean", "document", "parser", "xlsx", "docx", "markdown"]
+dependencies = [
+    "lxml>=5.0.0",
+    "olefile>=0.47",
+    "pycryptodome>=3.20.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[project.scripts]
+skdconv = "skdconv.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["skdconv"]
