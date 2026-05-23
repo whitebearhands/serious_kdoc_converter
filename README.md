@@ -1,5 +1,9 @@
 # Serious KDocument Converter(skdconv)
 
+[![PyPI version](https://img.shields.io/pypi/v/skdconv)](https://pypi.org/project/skdconv/)
+[![Python versions](https://img.shields.io/pypi/pyversions/skdconv)](https://pypi.org/project/skdconv/)
+[![License](https://img.shields.io/pypi/l/skdconv)](LICENSE)
+
 한국 공문서(HWP, HWPX, HWPML, XLS, XLSX, DOCX)를 마크다운으로 변환하는 파서 라이브러리입니다.
 
 ## 지원 포맷
