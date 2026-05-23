@@ -6,7 +6,7 @@ import re
 import struct
 from typing import Optional, Tuple
 
-VERSION = "0.1.0"
+VERSION = "1.0.3"
 
 
 class KordocError(Exception):
