@@ -9,14 +9,19 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4      
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install build twine
+          
+      # 빌드 도구로 uv를 쓰신다면 uv build를, 아니라면 기존대로 사용하시면 됩니다.
+      - run: pip install build
       - run: python -m build
-      - run: twine upload dist/* --verbose
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+      # pypa 공식 액션 사용 (내부적으로 429 완화 및 보안 인증 처리)
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
