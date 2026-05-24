@@ -1,5 +1,6 @@
 # Serious KDocument Converter(skdconv)
 
+[![Publish to PyPI](https://github.com/whitebearhands/serious_kdoc_converter/actions/workflows/publish.yaml/badge.svg)](https://github.com/whitebearhands/serious_kdoc_converter/actions/workflows/publish.yaml)
 [![PyPI version](https://img.shields.io/pypi/v/skdconv)](https://pypi.org/project/skdconv/)
 [![Python versions](https://img.shields.io/pypi/pyversions/skdconv)](https://pypi.org/project/skdconv/)
 [![License](https://img.shields.io/pypi/l/skdconv)](LICENSE)
