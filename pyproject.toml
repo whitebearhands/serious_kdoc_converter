@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "skdconv"
-version = "1.0.4"
+version = "1.0.5"
 description = "문서(HWP 3.x, HWP 5.x, HWPX, HWPML, XLSX, XLS, DOCX)를 마크다운으로 변환하는 파서 라이브러리"
 readme = "README.md"
 requires-python = ">=3.10"

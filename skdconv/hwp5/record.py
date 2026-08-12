@@ -6,7 +6,7 @@ import zlib
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
-from ..utils import SKDConvErrorError
+from ..utils import SKDConvError
 
 # ─── 레코드 태그 상수 ────────────────────────────────
 TAG_PARA_HEADER   = 0x0042
@@ -123,7 +123,7 @@ def decompress_stream(data: bytes) -> bytes:
 
 def parse_file_header(data: bytes) -> HwpFileHeader:
     if len(data) < 40:
-        raise SKDConvErrorError("FileHeader가 너무 짧습니다 (최소 40바이트)")
+        raise SKDConvError("FileHeader가 너무 짧습니다 (최소 40바이트)")
     sig = data[:32].decode("utf-8", errors="replace").rstrip("\x00")
     version_major = data[35]
     flags = struct.unpack_from("<I", data, 36)[0]

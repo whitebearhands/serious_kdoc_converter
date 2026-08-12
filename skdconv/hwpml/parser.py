@@ -11,7 +11,7 @@ from ..types import (
     CellContext, DocumentMetadata, InternalParseResult, IRBlock,
     OutlineItem, ParseOptions, ParseWarning,
 )
-from ..utils import SKDConvErrorError, strip_dtd
+from ..utils import SKDConvError, strip_dtd
 from ..table.builder import blocks_to_markdown, build_table
 from ..page_range import parse_page_range
 
@@ -258,7 +258,7 @@ def _count_sections(body: ET._Element) -> int:
 def parse_hwpml_document(data: bytes, options: Optional[ParseOptions] = None) -> InternalParseResult:
     if len(data) > MAX_HWPML_BYTES:
         mb = len(data) / 1024 / 1024
-        raise SKDConvErrorError(f"HWPML 파일 크기 초과 ({mb:.1f}MB > 50MB)")
+        raise SKDConvError(f"HWPML 파일 크기 초과 ({mb:.1f}MB > 50MB)")
 
     text = data.decode("utf-8", errors="replace").lstrip("﻿")
     text = text.replace("&nbsp;", "&#160;")

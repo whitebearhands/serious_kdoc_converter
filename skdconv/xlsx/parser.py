@@ -17,7 +17,7 @@ from ..types import (
     CellContext, DocumentMetadata, InternalParseResult, IRBlock,
     ParseOptions, ParseWarning,
 )
-from ..utils import SKDConvErrorError, precheck_zip_size, strip_dtd
+from ..utils import SKDConvError, precheck_zip_size, strip_dtd
 from ..table.builder import blocks_to_markdown, build_table
 from ..page_range import parse_page_range
 
@@ -311,7 +311,7 @@ def parse_xlsx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
     try:
         zf = zipfile.ZipFile(io.BytesIO(data))
     except zipfile.BadZipFile as e:
-        raise SKDConvErrorError(f"유효하지 않은 XLSX 파일: {e}") from e
+        raise SKDConvError(f"유효하지 않은 XLSX 파일: {e}") from e
 
     warnings: List[ParseWarning] = []
 
@@ -319,7 +319,7 @@ def parse_xlsx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
         names = set(zf.namelist())
 
         if "xl/workbook.xml" not in names:
-            raise SKDConvErrorError("유효하지 않은 XLSX 파일: xl/workbook.xml이 없습니다")
+            raise SKDConvError("유효하지 않은 XLSX 파일: xl/workbook.xml이 없습니다")
 
         # 1. 공유 문자열
         shared_strings: List[str] = []
@@ -336,7 +336,7 @@ def parse_xlsx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
             zf.read("xl/workbook.xml").decode("utf-8", errors="replace")
         )
         if not sheets:
-            raise SKDConvErrorError("XLSX 파일에 시트가 없습니다")
+            raise SKDConvError("XLSX 파일에 시트가 없습니다")
 
         # 3. 관계 매핑
         rels: Dict[str, str] = {}

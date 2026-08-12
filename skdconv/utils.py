@@ -6,15 +6,15 @@ import re
 import struct
 from typing import Optional, Tuple
 
-VERSION = "1.0.3"
+VERSION = "1.0.5"
 
 
-class SKDConvErrorError(Exception):
+class SKDConvError(Exception):
     pass
 
 
 def sanitize_error(err: BaseException) -> str:
-    if isinstance(err, SKDConvErrorError):
+    if isinstance(err, SKDConvError):
         return str(err)
     return "문서 처리 중 오류가 발생했습니다"
 
@@ -52,7 +52,7 @@ def precheck_zip_size(
 
         entry_count = struct.unpack_from("<H", data, eocd_offset + 10)[0]
         if entry_count > max_entries:
-            raise SKDConvErrorError(f"ZIP 엔트리 수 초과: {entry_count} (최대 {max_entries})")
+            raise SKDConvError(f"ZIP 엔트리 수 초과: {entry_count} (최대 {max_entries})")
 
         cd_size = struct.unpack_from("<I", data, eocd_offset + 12)[0]
         cd_offset = struct.unpack_from("<I", data, eocd_offset + 16)[0]
@@ -76,12 +76,12 @@ def precheck_zip_size(
         if total_uncompressed > max_uncompressed_size:
             mb = total_uncompressed / 1024 / 1024
             max_mb = max_uncompressed_size / 1024 / 1024
-            raise SKDConvErrorError(
+            raise SKDConvError(
                 f"ZIP 비압축 크기 초과: {mb:.1f}MB (최대 {max_mb:.0f}MB)"
             )
 
         return total_uncompressed, entry_count
-    except SKDConvErrorError:
+    except SKDConvError:
         raise
     except Exception:
         return 0, 0

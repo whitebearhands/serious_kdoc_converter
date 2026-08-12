@@ -17,7 +17,7 @@ from ..types import (
     InternalParseResult, IRBlock, OutlineItem, ParseOptions, ParseWarning,
     HEADING_RATIO_H1, HEADING_RATIO_H2, HEADING_RATIO_H3,
 )
-from ..utils import SKDConvErrorError, is_path_traversal, precheck_zip_size, sanitize_href, strip_dtd
+from ..utils import SKDConvError, is_path_traversal, precheck_zip_size, sanitize_href, strip_dtd
 from ..table.builder import MAX_COLS, MAX_ROWS, blocks_to_markdown, build_table, convert_table_to_text
 from ..page_range import parse_page_range
 from .equation import hml_to_latex
@@ -409,17 +409,17 @@ def _extract_from_broken_zip(data: bytes) -> InternalParseResult:
 
             total_decompressed += len(content) * 2
             if total_decompressed > MAX_DECOMPRESS_SIZE:
-                raise SKDConvErrorError("압축 해제 크기 초과")
+                raise SKDConvError("압축 해제 크기 초과")
 
             section_num += 1
             blocks.extend(_parse_section_xml(content, None, warnings, section_num, nested_counter))
-        except SKDConvErrorError:
+        except SKDConvError:
             raise
         except Exception:
             continue
 
     if not blocks:
-        raise SKDConvErrorError("손상된 HWPX에서 섹션 데이터를 복구할 수 없습니다")
+        raise SKDConvError("손상된 HWPX에서 섹션 데이터를 복구할 수 없습니다")
 
     markdown = blocks_to_markdown(blocks)
     return InternalParseResult(markdown=markdown, blocks=blocks, warnings=warnings)
@@ -897,13 +897,13 @@ def parse_hwpx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
     with zf:
         actual_entries = len(zf.namelist())
         if actual_entries > MAX_ZIP_ENTRIES:
-            raise SKDConvErrorError("ZIP 엔트리 수 초과 (ZIP bomb 의심)")
+            raise SKDConvError("ZIP 엔트리 수 초과 (ZIP bomb 의심)")
 
         # DRM 감지 (간략 — COM fallback 미구현)
         try:
             manifest_xml = zf.read("META-INF/manifest.xml").decode("utf-8", errors="replace")
             if "encryption-data" in manifest_xml:
-                raise SKDConvErrorError("DRM 암호화된 HWPX 파일입니다.")
+                raise SKDConvError("DRM 암호화된 HWPX 파일입니다.")
         except KeyError:
             pass
 
@@ -916,7 +916,7 @@ def parse_hwpx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
         # 섹션 경로
         section_paths = _resolve_section_paths(zf)
         if not section_paths:
-            raise SKDConvErrorError("HWPX에서 섹션 파일을 찾을 수 없습니다")
+            raise SKDConvError("HWPX에서 섹션 파일을 찾을 수 없습니다")
 
         metadata.page_count = len(section_paths)
 
@@ -940,7 +940,7 @@ def parse_hwpx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
                 parsed += 1
                 if options and options.on_progress:
                     options.on_progress(parsed, total_target)
-            except SKDConvErrorError:
+            except SKDConvError:
                 raise
             except Exception as e:
                 warnings.append(ParseWarning(
