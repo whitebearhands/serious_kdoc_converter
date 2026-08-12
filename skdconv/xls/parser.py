@@ -13,7 +13,7 @@ import struct
 from dataclasses import dataclass
 from typing import Optional
 
-from ..utils import KordocError
+from ..utils import SKDConvErrorError
 from ..types import IRBlock, CellContext, DocumentMetadata, InternalParseResult, ParseOptions, ParseWarning
 from ..table.builder import build_table, blocks_to_markdown
 from ..hwp5.cfb_lenient import parse_lenient_cfb
@@ -73,11 +73,11 @@ def _process_globals(
 ) -> tuple[list[_BoundSheet], list[str], int, bool, int]:
     """→ (sheets, sst, code_page, encrypted, end_index)."""
     if not records or records[0].opcode != OP_BOF:
-        raise KordocError("XLS: 첫 레코드가 BOF가 아님")
+        raise SKDConvErrorError("XLS: 첫 레코드가 BOF가 아님")
 
     bof = decode_bof(records[0].data)
     if bof is None or bof[1] != DT_GLOBALS:
-        raise KordocError("XLS: Globals 서브스트림 BOF 누락")
+        raise SKDConvErrorError("XLS: Globals 서브스트림 BOF 누락")
 
     sheets: list[_BoundSheet] = []
     code_page = 1200
@@ -223,21 +223,21 @@ def parse_xls_document(
     try:
         cfb = parse_lenient_cfb(data)
     except Exception as e:
-        raise KordocError(f"XLS: OLE2 시그니처 검증 실패 — {e}") from e
+        raise SKDConvErrorError(f"XLS: OLE2 시그니처 검증 실패 — {e}") from e
 
     wb = cfb.find_stream("/Workbook") or cfb.find_stream("/Book")
     if not wb:
-        raise KordocError("XLS: Workbook 스트림이 없음 (BIFF5 또는 비표준 파일)")
+        raise SKDConvErrorError("XLS: Workbook 스트림이 없음 (BIFF5 또는 비표준 파일)")
 
     # 2. BIFF 레코드 시퀀스
     records = read_records(wb)
     if not records:
-        raise KordocError("XLS: 시그니처 레코드가 없음 (Workbook 스트림 손상)")
+        raise SKDConvErrorError("XLS: 시그니처 레코드가 없음 (Workbook 스트림 손상)")
 
     # 3. BIFF 버전 체크
     first_bof = decode_bof(records[0].data)
     if first_bof and first_bof[0] != 0x0600:
-        raise KordocError(f"XLS: BIFF8(0x0600)만 지원 — 본 파일은 0x{first_bof[0]:04x}")
+        raise SKDConvErrorError(f"XLS: BIFF8(0x0600)만 지원 — 본 파일은 0x{first_bof[0]:04x}")
 
     # 4. Globals 처리
     sheets, sst, _code_page, encrypted, _end_idx = _process_globals(records)

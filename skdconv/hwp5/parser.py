@@ -25,7 +25,7 @@ from ..types import (
     InlineStyle, ExtractedImage,
     HEADING_RATIO_H1, HEADING_RATIO_H2, HEADING_RATIO_H3,
 )
-from ..utils import KordocError, sanitize_href
+from ..utils import SKDConvErrorError, sanitize_href
 from ..page_range import parse_page_range
 from ..hwpx.equation import hml_to_latex
 
@@ -52,7 +52,7 @@ def parse_hwp5_document(data: bytes, options: Optional[ParseOptions] = None) -> 
             lenient = parse_lenient_cfb(data)
             warnings.append(ParseWarning(message="손상된 CFB 컨테이너 — lenient 모드로 복구", code="LENIENT_CFB_RECOVERY"))
         except Exception as e:
-            raise KordocError(f"CFB 컨테이너 파싱 실패 (strict 및 lenient 모두): {e}") from e
+            raise SKDConvErrorError(f"CFB 컨테이너 파싱 실패 (strict 및 lenient 모두): {e}") from e
 
     def find_stream(path: str) -> Optional[bytes]:
         norm = path.lstrip("/")
@@ -70,14 +70,14 @@ def parse_hwp5_document(data: bytes, options: Optional[ParseOptions] = None) -> 
 
     header_data = find_stream("/FileHeader")
     if not header_data:
-        raise KordocError("FileHeader 스트림 없음")
+        raise SKDConvErrorError("FileHeader 스트림 없음")
     header = parse_file_header(header_data)
     if header.signature != "HWP Document File":
-        raise KordocError("HWP 시그니처 불일치")
+        raise SKDConvErrorError("HWP 시그니처 불일치")
     if header.flags & FLAG_ENCRYPTED:
-        raise KordocError("암호화된 HWP는 지원하지 않습니다")
+        raise SKDConvErrorError("암호화된 HWP는 지원하지 않습니다")
     if header.flags & FLAG_DRM:
-        raise KordocError("DRM 보호된 HWP는 지원하지 않습니다")
+        raise SKDConvErrorError("DRM 보호된 HWP는 지원하지 않습니다")
 
     compressed = bool(header.flags & FLAG_COMPRESSED)
     distribution = bool(header.flags & FLAG_DISTRIBUTION)
@@ -94,7 +94,7 @@ def parse_hwp5_document(data: bytes, options: Optional[ParseOptions] = None) -> 
         sections = _find_sections(find_stream, ole, lenient, compressed)
 
     if not sections:
-        raise KordocError("섹션 스트림을 찾을 수 없습니다")
+        raise SKDConvErrorError("섹션 스트림을 찾을 수 없습니다")
 
     metadata.page_count = len(sections)
 
@@ -113,14 +113,14 @@ def parse_hwp5_document(data: bytes, options: Optional[ParseOptions] = None) -> 
             buf = (decompress_stream(section_data) if not distribution and compressed else section_data)
             total_decomp += len(buf)
             if total_decomp > MAX_TOTAL_DECOMPRESS:
-                raise KordocError("총 압축 해제 크기 초과 (decompression bomb 의심)")
+                raise SKDConvErrorError("총 압축 해제 크기 초과 (decompression bomb 의심)")
             recs = read_records(buf)
             sb = _parse_section(recs, doc_info, warnings, si + 1, nested_counter)
             blocks.extend(sb)
             parsed += 1
             if options and options.on_progress:
                 options.on_progress(parsed, total_target)
-        except KordocError:
+        except SKDConvErrorError:
             raise
         except Exception as e:
             warnings.append(ParseWarning(page=si + 1, message=f"섹션 {si + 1} 파싱 실패: {e}", code="PARTIAL_PARSE"))

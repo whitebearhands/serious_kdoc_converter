@@ -16,7 +16,7 @@ from .types import (
     FileType,
     InternalParseResult,
 )
-from .utils import KordocError, VERSION
+from .utils import SKDConvError, VERSION
 from .detect import detect_format, detect_zip_format, detect_ole2_format
 
 __version__ = VERSION
@@ -96,7 +96,7 @@ __all__ = [
     "OutlineItem",
     "ExtractedImage",
     "FileType",
-    "KordocError",
+    "SKDConvError",
     "VERSION",
     "detect_format",
     "detect_zip_format",

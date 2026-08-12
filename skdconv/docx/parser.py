@@ -16,7 +16,7 @@ from ..types import (
     DocumentMetadata, ExtractedImage, InternalParseResult, IRBlock,
     IRCell, IRTable, ParseOptions, ParseWarning,
 )
-from ..utils import KordocError, precheck_zip_size, strip_dtd
+from ..utils import SKDConvErrorError, precheck_zip_size, strip_dtd
 from ..table.builder import blocks_to_markdown
 from .equation import is_display_math, omml_element_to_latex
 
@@ -462,7 +462,7 @@ def parse_docx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
     try:
         zf = zipfile.ZipFile(io.BytesIO(data))
     except zipfile.BadZipFile as e:
-        raise KordocError(f"유효하지 않은 DOCX 파일: {e}") from e
+        raise SKDConvErrorError(f"유효하지 않은 DOCX 파일: {e}") from e
 
     warnings: List[ParseWarning] = []
 
@@ -470,7 +470,7 @@ def parse_docx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
         names = set(zf.namelist())
 
         if "word/document.xml" not in names:
-            raise KordocError("유효하지 않은 DOCX 파일: word/document.xml이 없습니다")
+            raise SKDConvErrorError("유효하지 않은 DOCX 파일: word/document.xml이 없습니다")
 
         # 1. 관계
         rels: Dict[str, str] = {}
@@ -518,7 +518,7 @@ def parse_docx_document(data: bytes, options: Optional[ParseOptions] = None) -> 
 
         body_els = _find_all(doc, "body")
         if not body_els:
-            raise KordocError("DOCX 본문(w:body)을 찾을 수 없습니다")
+            raise SKDConvErrorError("DOCX 본문(w:body)을 찾을 수 없습니다")
 
         blocks: List[IRBlock] = []
         body = body_els[0]

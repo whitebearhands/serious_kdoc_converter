@@ -414,8 +414,19 @@ def blocks_to_markdown(blocks: List[IRBlock]) -> str:
             continue
 
         if block.type == "image" and block.text:
-            lines.extend(["", f"![image]({block.text})", ""])
-            i += 1
+            # 연속된 이미지 블록(문서에서 나란히 배치)은 한 줄로 출력
+            imgs = [f"![image]({block.text})"]
+            j = i + 1
+            while (
+                j < len(blocks)
+                and blocks[j].type == "image"
+                and blocks[j].text
+                and blocks[j].page_number == block.page_number
+            ):
+                imgs.append(f"![image]({blocks[j].text})")
+                j += 1
+            lines.extend(["", " ".join(imgs), ""])
+            i = j
             continue
 
         if block.type == "separator":
